@@ -1,0 +1,33 @@
+name: Build iOS dylib
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # 支持手动点按钮触发编译
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build iOS arm64 dylib
+        run: |
+          # 编译参数：target arm64-apple-ios，SDK使用系统自带iPhoneOS
+          xcrun --sdk iphoneos clang \
+            -arch arm64 \
+            -target arm64-apple-ios15.0 \
+            -shared \
+            -fPIC \
+            -o libtest.dylib \
+            test.c
+        # 👉 把 test.c 替换成你的源文件，多个文件就  test.c a.c b.c
+
+      - name: Upload dylib
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-arm64-dylib
+          path: libtest.dylib
